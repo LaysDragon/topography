@@ -754,13 +754,30 @@ public class SkyIslandGeneratorV2 extends SkyIslandGenerator implements IStructu
 
     @ScriptMethodDocumentation(args = "int,int,  int", usage = "radius, count, minCount", notes = "Generates a Millenaire SkyIslandDataV2 and returns it. "
             + "Radius is the default radius of the sky islands to be generated, count is the number of times to attempt to generate sky islands, minCount is the minimum number of the sky islands which must be generated. ")
-    public SkyIslandDataV2 addMillenaireSkyIslands(final int radius ,final int count ,final int minCount) {
+    public SkyIslandDataV2MillenaireVillage addMillenaireSkyIslands(final int radius ,final int count ,final int minCount) {
         final SkyIslandDataV2MillenaireVillage data = new SkyIslandDataV2MillenaireVillage();
         data.setHorizontalRadius(radius);
         data.setVerticalRadius(radius);
         data.setCount(count);
         data.setRandomTypes(true);
         data.setMinCount(minCount);
+
+        this.SkyIslandDataV2.add(data);
+
+        return data;
+    }
+
+    //TODO Update documentation
+    @ScriptMethodDocumentation(args = "int, int, boolean", usage = "radius, count, randomTypes", notes = "Generates a SkyIslandDataV2 and returns it. "
+            + "Radius is the radius of the sky islands to be generated, count is the number of times to attempt to generate sky islands, randomTypes is how to use the SkyIslandTypes. "
+            + "If randomTypes is set to true it will randomly choose a SkyIslandType from the list when an island is generated. "
+            + "If it is set to false, then every time an island is generated it will use the next SkyIslandType in the list. This allows you to guarantee certain islands are generated in a region.")
+    public SkyIslandDataV2RandomSizeExtend addRandomSizeSkyIslands(final int count, final boolean randomTypes) {
+        final SkyIslandDataV2RandomSizeExtend data = new SkyIslandDataV2RandomSizeExtend();
+//        data.setHorizontalRadius(50);
+//        data.setVerticalRadius(50);
+        data.setCount(count);
+        data.setRandomTypes(randomTypes);
 
         this.SkyIslandDataV2.add(data);
 

@@ -43,12 +43,35 @@ public class SkyIslandType
     private boolean generateVillages = false;
     private int villageChance = 4;
     private List<IGenerator> generators = new ArrayList<IGenerator>();
-    
+
+
+
     public SkyIslandType()
     {
 //        this.decorators.put(new DecoratorScattered(Blocks.BEDROCK.getDefaultState()), 64);
     }
-    
+
+    public SkyIslandType(SkyIslandType other) {
+        this.mainBlock = other.mainBlock;
+        this.genBiomeBlocks = other.genBiomeBlocks;
+        this.genDecorations = other.genDecorations;
+        this.biome = other.biome;
+        this.genAnimals = other.genAnimals;
+        this.fluidPercentage = other.fluidPercentage;
+        this.fluidBlock = other.fluidBlock;
+        this.generateFluid = other.generateFluid;
+        this.generateMineshafts = other.generateMineshafts;
+        this.mineshaftChance = other.mineshaftChance;
+        this.generateStrongholds = other.generateStrongholds;
+        this.strongholdChance = other.strongholdChance;
+        this.generateVillages = other.generateVillages;
+        this.villageChance = other.villageChance;
+        this.generators.addAll(other.generators);
+        this.decorators.addAll(other.decorators);
+        this.boundsToState.putAll(other.boundsToState);
+
+    }
+
     @ScriptArgs(args = {ArgType.NON_NULL_BIOME_ID})
     public SkyIslandType(final int biome)
     {

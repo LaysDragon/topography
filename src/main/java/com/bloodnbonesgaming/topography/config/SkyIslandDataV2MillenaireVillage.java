@@ -55,6 +55,7 @@ public class SkyIslandDataV2MillenaireVillage extends SkyIslandDataV2AutoExtend 
 
     public void setVillageType(String cultureName, String villageName) {
         this.villageType = Culture.getCultureByName(cultureName).getVillageType(villageName);
+
     }
 
 
@@ -79,25 +80,18 @@ public class SkyIslandDataV2MillenaireVillage extends SkyIslandDataV2AutoExtend 
 
     @Override
     public void addType(SkyIslandType type) {
-//        super.addType(type);
         for (Culture culture : Culture.ListCultures) {
             for (VillageType villageType : culture.listVillageTypes) {
-                if (villageType.biomes.contains(Biome.getBiome(type.getBiome()).getBiomeName().toLowerCase())) {
-                    type.setFluidPercentage(0.4);
-                    super.addType(type);
-                    return;
+                if(villageType.weight > 0){
+                    if (villageType.biomes.contains(Biome.getBiome(type.getBiome()).getBiomeName().toLowerCase())) {
+                        type.setFluidPercentage(0.4);
+                        super.addType(type);
+                        return;
+                    }
                 }
             }
         }
     }
-
-//    @Override
-//    public double getHorizontalRadius() {
-//        if (this.villageType != null) {
-//            return this.villageType.radius + this.villageType.radius * 0.4;//補正縮水的範圍
-//        }
-//        return super.getHorizontalRadius();
-//    }
 
     @Override
     public SkyIslandDataV2AutoExtend generate(Random random) {
