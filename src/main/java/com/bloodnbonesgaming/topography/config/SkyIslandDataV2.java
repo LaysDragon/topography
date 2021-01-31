@@ -20,7 +20,7 @@ public class SkyIslandDataV2 extends SkyIslandData {
     private double fluidDepth = -1;
     private int minHeight = 5;
     private int maxHeight = 220;
-    private List<SkyIslandType> types = new ArrayList<SkyIslandType>();
+    protected List<SkyIslandType> types = new ArrayList<SkyIslandType>();
     private boolean randomTypes = true;
     
     private int minCount = 0;
@@ -145,4 +145,6 @@ public class SkyIslandDataV2 extends SkyIslandData {
     {
         this.minCount = count;
     }
+
 }
+

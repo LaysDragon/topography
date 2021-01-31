@@ -53,6 +53,7 @@ dependencies {
     compile fileTree(dir: 'dependencies/WorldBook', include: '*.jar')
     compile fileTree(dir: 'dependencies/BetterWithMods', include: '*.jar')
     compile fileTree(dir: 'dependencies/RTG', include: '*.jar')
+    compile fileTree(dir: 'dependencies/Millenaire', include: '*.jar')
 }
 
 processResources

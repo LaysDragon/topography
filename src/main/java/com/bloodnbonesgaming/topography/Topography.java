@@ -10,6 +10,7 @@ import com.bloodnbonesgaming.topography.event.CoreEventHandler;
 import com.bloodnbonesgaming.topography.network.PacketSyncPreset;
 import com.bloodnbonesgaming.topography.proxy.CommonProxy;
 import com.bloodnbonesgaming.topography.util.capabilities.TopographyPlayerData;
+import com.bloodnbonesgaming.topography.world.MillenaireVillageGen;
 import com.bloodnbonesgaming.topography.world.WorldTypeCustomizable;
 
 import net.minecraftforge.common.MinecraftForge;
@@ -28,9 +29,11 @@ import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
 import net.minecraftforge.fml.common.event.FMLServerStoppedEvent;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
+import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.server.permission.DefaultPermissionLevel;
 import net.minecraftforge.server.permission.PermissionAPI;
+import org.millenaire.common.world.WorldGenVillage;
 
 @Mod(modid = ModInfo.MODID, name = ModInfo.MOD_NAME, version = ModInfo.VERSION, dependencies = "required-after:bnbgaminglib@[2.14.0,);after:crafttweaker;after:worldbook;after:rtg;",
         acceptedMinecraftVersions = "[1.12,1.13)")
@@ -47,6 +50,7 @@ public class Topography extends BNBGamingMod
     public static boolean worldbook = false;
     public static boolean betterWithMods = false;
     public static boolean rtg = false;
+    public static boolean millenaire = false;
 
     @EventHandler
     public void preInit(final FMLPreInitializationEvent event)
@@ -67,6 +71,12 @@ public class Topography extends BNBGamingMod
         {
 			Topography.rtg = true;
         }
+
+        if (Loader.isModLoaded("millenaire"))
+        {
+            Topography.millenaire = true;
+        }
+
 		ScriptDocumentationHandler.setScriptDocs(event.getAsmData());
         Topography.proxy.registerEventHandlers();
         TopographyPlayerData.register();
@@ -86,6 +96,11 @@ public class Topography extends BNBGamingMod
         PermissionAPI.registerNode("topography.world.spawn", DefaultPermissionLevel.ALL, "/topography spawn command");
         PermissionAPI.registerNode("topography.preset.lock", DefaultPermissionLevel.NONE, "/topography lock command");
         PermissionAPI.registerNode("topography.preset.unlock", DefaultPermissionLevel.NONE, "/topography unlock command");
+
+        if(Topography.millenaire) {
+            GameRegistry.registerWorldGenerator(new MillenaireVillageGen(), 1000);
+        }
+
     }
 
     @EventHandler
