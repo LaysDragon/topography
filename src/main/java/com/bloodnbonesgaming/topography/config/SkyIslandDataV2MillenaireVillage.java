@@ -25,6 +25,29 @@ public class SkyIslandDataV2MillenaireVillage extends SkyIslandDataV2AutoExtend 
     VillageType villageType = null;
 
 
+    public int getMaxBottomHeight() {
+        return maxBottomHeight;
+    }
+
+    @ScriptMethodDocumentation(args = "double, double", usage = "lower, upper", notes = "Sets the lower/upper bound of island radius resize ratio")
+    public void setMaxBottomHeight(int maxBBottomHeight) {
+        this.maxBottomHeight = maxBottomHeight;
+    }
+
+    @ScriptMethodDocumentation(args = "double, double", usage = "lower, upper", notes = "Sets the lower/upper bound of island radius resize ratio")
+    public double getMaxFluidPercentage() {
+        return maxFluidPercentage;
+    }
+
+    @ScriptMethodDocumentation(args = "double, double", usage = "lower, upper", notes = "Sets the lower/upper bound of island radius resize ratio")
+    public void setMaxFluidPercentage(double maxFluidPercentage) {
+        this.maxFluidPercentage = maxFluidPercentage;
+    }
+
+    private int maxBottomHeight = 64;
+    private double maxFluidPercentage = 0.4;
+
+
     @ScriptMethodDocumentation(args = "double, double", usage = "lower, upper", notes = "Sets the lower/upper bound of island radius resize ratio")
     public void setResizeRatioBound(MinMaxBounds bounds) {
         this.resizeRatioBound = bounds;
@@ -82,10 +105,12 @@ public class SkyIslandDataV2MillenaireVillage extends SkyIslandDataV2AutoExtend 
     public void addType(SkyIslandType type) {
         for (Culture culture : Culture.ListCultures) {
             for (VillageType villageType : culture.listVillageTypes) {
-                if(villageType.weight > 0) {
+                if (villageType.weight > 0) {
                     if (villageType.biomes.contains(Biome.getBiome(type.getBiome()).getBiomeName().toLowerCase())) {
                         type = new SkyIslandType(type);
-                        type.setFluidPercentage(0.4);
+                        if (type.getFluidPercentage() > maxFluidPercentage) {
+                            type.setFluidPercentage(maxFluidPercentage);
+                        }
                         super.addType(type);
                         return;
                     }
@@ -108,15 +133,14 @@ public class SkyIslandDataV2MillenaireVillage extends SkyIslandDataV2AutoExtend 
         }
 //        MillCommonUtilities.random = random;
         VillageType selectVillage = getVillageWithWeight(validVillageTypes, random);
-        if(selectVillage == null){
+        if (selectVillage == null) {
             return newData;
         }
 //        VillageType selectVillage = (VillageType)MillCommonUtilities.getWeightedChoice(validVillageTypes, null);
         newData.setVillageType(selectVillage);
         newData.setLockType(islandType);
         newData.setHorizontalRadius((int) Math.floor(newData.getVillageType().radius * (random.nextDouble() * (newData.getResizeRatioUpperBound() - newData.getResizeRatioLowerBound()) + newData.getResizeRatioLowerBound()))); //0.8~1.4
-        newData.setBottomHeight(newData.getVillageType().radius);
-        newData.setTopHeight(20);
+        newData.setBottomHeight(Math.min(newData.getVillageType().radius, maxBottomHeight));
 //        Biome.getBiome(this.types.get(0).getBiome()).getBiomeName().toLowerCase();
 
 
@@ -161,6 +185,8 @@ public class SkyIslandDataV2MillenaireVillage extends SkyIslandDataV2AutoExtend 
 //        newInstance.setVillageName(this.getVillageName());
         newInstance.setVillageType(this.getVillageType());
         newInstance.setResizeRatioBound(this.getResizeRatioBound());
+        newInstance.setMaxBottomHeight(this.getMaxBottomHeight());
+        newInstance.setMaxFluidPercentage(this.getMaxFluidPercentage());
         return data;
     }
 }

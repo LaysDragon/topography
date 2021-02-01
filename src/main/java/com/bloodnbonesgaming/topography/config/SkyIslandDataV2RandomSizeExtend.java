@@ -17,9 +17,9 @@ public class SkyIslandDataV2RandomSizeExtend extends SkyIslandDataV2AutoExtend {
         put(1, 9);
         put(100, 1);
     }};
-    Map<Integer, Integer> fullScaleMap  = new LinkedHashMap<>();
+    Map<Integer, Integer> fullScaleMap = new LinkedHashMap<>();
     int totalChance = 0;
-    Map<Integer, Integer> chanceMap  = new HashMap<>();
+    Map<Integer, Integer> chanceMap = new HashMap<>();
 
     public int getMaxVerticalRadius() {
         return maxVerticalRadius;
@@ -65,7 +65,6 @@ public class SkyIslandDataV2RandomSizeExtend extends SkyIslandDataV2AutoExtend {
     }
 
 
-
     void calculateFullMap() {
         if (!fullScaleMap.isEmpty()) {
             return;
@@ -78,7 +77,7 @@ public class SkyIslandDataV2RandomSizeExtend extends SkyIslandDataV2AutoExtend {
             processCurrentSize(previousEntry, nextEntry, currentSize);
 
 
-            if(this.interpolation){
+            if (this.interpolation) {
                 currentSize++;
                 if (currentSize == nextEntry.getKey()) {
                     if (scaleIter.hasNext()) {
@@ -89,7 +88,7 @@ public class SkyIslandDataV2RandomSizeExtend extends SkyIslandDataV2AutoExtend {
                         break;
                     }
                 }
-            }else{
+            } else {
                 currentSize = nextEntry.getKey();
                 if (scaleIter.hasNext()) {
                     previousEntry = nextEntry;
@@ -117,19 +116,20 @@ public class SkyIslandDataV2RandomSizeExtend extends SkyIslandDataV2AutoExtend {
         }
     }
 
-    Map<Integer,SkyIslandDataV2AutoExtend> cache = new HashMap<>();
+    Map<Integer, SkyIslandDataV2AutoExtend> cache = new HashMap<>();
+
     @Override
     public SkyIslandDataV2AutoExtend generate(Random random) {
         this.calculateFullMap();
-        int randomPointer = random.nextInt(this.totalChance)+1;
+        int randomPointer = random.nextInt(this.totalChance) + 1;
         int radius = this.chanceMap.get(randomPointer);
-        if(cache.containsKey(radius)){
+        if (cache.containsKey(radius)) {
             return cache.get(radius);
         }
         SkyIslandDataV2AutoExtend data = this.copy();
         data.setHorizontalRadius(radius);
         data.setVerticalRadius(Math.min(radius, maxVerticalRadius));
-        cache.put(radius,data);
+        cache.put(radius, data);
         return data;
     }
 
@@ -151,6 +151,8 @@ public class SkyIslandDataV2RandomSizeExtend extends SkyIslandDataV2AutoExtend {
         newInstance.chanceMap = this.chanceMap;//.putAll(this.chanceMap);
         newInstance.totalChance = this.totalChance;
         newInstance.cache = this.cache;
+        newInstance.setInterpolation(this.isInterpolation());
+        newInstance.setMaxVerticalRadius(this.getMaxVerticalRadius());
         return data;
     }
 
