@@ -82,8 +82,9 @@ public class SkyIslandDataV2MillenaireVillage extends SkyIslandDataV2AutoExtend 
     public void addType(SkyIslandType type) {
         for (Culture culture : Culture.ListCultures) {
             for (VillageType villageType : culture.listVillageTypes) {
-                if(villageType.weight > 0){
+                if(villageType.weight > 0) {
                     if (villageType.biomes.contains(Biome.getBiome(type.getBiome()).getBiomeName().toLowerCase())) {
+                        type = new SkyIslandType(type);
                         type.setFluidPercentage(0.4);
                         super.addType(type);
                         return;
@@ -107,6 +108,9 @@ public class SkyIslandDataV2MillenaireVillage extends SkyIslandDataV2AutoExtend 
         }
 //        MillCommonUtilities.random = random;
         VillageType selectVillage = getVillageWithWeight(validVillageTypes, random);
+        if(selectVillage == null){
+            return newData;
+        }
 //        VillageType selectVillage = (VillageType)MillCommonUtilities.getWeightedChoice(validVillageTypes, null);
         newData.setVillageType(selectVillage);
         newData.setLockType(islandType);

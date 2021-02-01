@@ -60,6 +60,12 @@ public class SkyIslandGeneratorV2 extends SkyIslandGenerator implements IStructu
     private MapGenVillage village;
     private boolean BWMVillageCompat = false;
     private boolean BWMMineshaftCompat = false;
+
+    public boolean isMillenaireIslandEnable() {
+        return MillenaireIslandEnable;
+    }
+
+    private boolean MillenaireIslandEnable = false;
     double[] islandNoiseArray = new double[65536];
     double[] islandWaterNoiseArray = new double[65536];
 
@@ -755,6 +761,7 @@ public class SkyIslandGeneratorV2 extends SkyIslandGenerator implements IStructu
     @ScriptMethodDocumentation(args = "int,int,  int", usage = "radius, count, minCount", notes = "Generates a Millenaire SkyIslandDataV2 and returns it. "
             + "Radius is the default radius of the sky islands to be generated, count is the number of times to attempt to generate sky islands, minCount is the minimum number of the sky islands which must be generated. ")
     public SkyIslandDataV2MillenaireVillage addMillenaireSkyIslands(final int radius ,final int count ,final int minCount) {
+        this.MillenaireIslandEnable = true;
         final SkyIslandDataV2MillenaireVillage data = new SkyIslandDataV2MillenaireVillage();
         data.setHorizontalRadius(radius);
         data.setVerticalRadius(radius);

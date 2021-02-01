@@ -32,6 +32,9 @@ public class MillenaireVillageGen extends WorldGenVillage {
         for (final IGenerator generator : definition.getGenerators()) {
             if (generator instanceof SkyIslandGeneratorV2) {
                 SkyIslandGeneratorV2 skyIslandsGenerator = (SkyIslandGeneratorV2) generator;
+                if(!skyIslandsGenerator.isMillenaireIslandEnable()){
+                    continue;
+                }
 
                 Map<SkyIslandData, Map<BlockPos, SkyIslandType>> islandPositions = skyIslandsGenerator.getIslandPositions(world.getSeed(), chunkX * 16, chunkZ * 16);
                 islandPositions.forEach((skyIslandData, blockPosSkyIslandTypeMap) -> {
