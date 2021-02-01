@@ -586,7 +586,7 @@ public class SkyIslandGenerator implements IGenerator
 //        river = GenLayerZoom.magnify(1000L, river, 3); //Lower to reduce size
 //        river = new GenLayerSmooth(1000L, river);
 //        river = GenLayerZoom.magnify(1000L, river, 1);
-        GenLayer biomes = new GenLayerBiomeSkyIslands(world.getSeed(), this);
+        GenLayer biomes = new GenLayerBiomeSkyIslands(world.getSeed(), this,parent);
 //        GenLayerRiverMixDC mix = new GenLayerRiverMixDC(1000L, biomes, river);
 //        mix.setRiverBiome(Biome.getIdForBiome(Biomes.VOID), Biome.getIdForBiome(Biomes.VOID));
         return biomes;

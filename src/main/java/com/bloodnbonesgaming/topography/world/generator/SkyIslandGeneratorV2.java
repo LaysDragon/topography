@@ -627,10 +627,11 @@ public class SkyIslandGeneratorV2 extends SkyIslandGenerator implements IStructu
         Random extendRandom = new Random((long) (this.currentRegionX) * 341873128712L
                 + (long) (this.currentRegionZ) * 132897987541L + worldSeed);
         this.islandPositions = new LinkedHashMap<SkyIslandData, Map<BlockPos, SkyIslandType>>();
-        for (SkyIslandDataV2 data : this.SkyIslandDataV2) {
+        for (final SkyIslandDataV2 islandData : this.SkyIslandDataV2) {
             int genCount = 0;
-            for (int i = 0; i < data.getCount() || (genCount < data.getMinCount() && i < data.getCount() * 2); i++) {
+            for (int i = 0; i < islandData.getCount() || (genCount < islandData.getMinCount() && i < islandData.getCount() * 2); i++) {
 //                long subSeed = rand.nextLong();
+                SkyIslandDataV2 data = islandData;
                 if (data instanceof SkyIslandDataV2AutoExtend) {
                     data = ((SkyIslandDataV2AutoExtend)data).generate(extendRandom);
                 }
@@ -1045,7 +1046,7 @@ public class SkyIslandGeneratorV2 extends SkyIslandGenerator implements IStructu
 //        river = GenLayerZoom.magnify(1000L, river, 3); //Lower to reduce size
 //        river = new GenLayerSmooth(1000L, river);
 //        river = GenLayerZoom.magnify(1000L, river, 1);
-        GenLayer biomes = new GenLayerBiomeSkyIslands(world.getSeed(), this);
+        GenLayer biomes = new GenLayerBiomeSkyIslands(world.getSeed(), this,parent);
 //        GenLayerRiverMixDC mix = new GenLayerRiverMixDC(1000L, biomes, river);
 //        mix.setRiverBiome(Biome.getIdForBiome(Biomes.VOID), Biome.getIdForBiome(Biomes.VOID));
         return biomes;
