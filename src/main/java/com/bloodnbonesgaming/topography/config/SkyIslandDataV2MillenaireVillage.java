@@ -4,6 +4,7 @@ import com.bloodnbonesgaming.lib.util.script.ScriptClassDocumentation;
 import com.bloodnbonesgaming.lib.util.script.ScriptMethodDocumentation;
 import com.bloodnbonesgaming.topography.ModInfo;
 import com.bloodnbonesgaming.topography.Topography;
+import io.netty.channel.unix.Errors;
 import net.minecraft.advancements.critereon.MinMaxBounds;
 import net.minecraft.world.biome.Biome;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
@@ -114,7 +115,8 @@ public class SkyIslandDataV2MillenaireVillage extends SkyIslandDataV2AutoExtend 
             for (Culture culture : Culture.ListCultures) {
                 for (VillageType villageType : culture.listVillageTypes) {
                     if (villageType.weight > 0) {
-                        if (villageType.biomes.contains(((String)REFLECT_BIOME_ACCESSOR.get(Biome.getBiome(type.getBiome()))).toLowerCase())) {
+
+                        if (villageType.biomes.contains(((String) REFLECT_BIOME_ACCESSOR.get(Biome.getBiome(type.getBiome()))).toLowerCase())) {
                             type = new SkyIslandType(type);
                             if (type.getFluidPercentage() > maxFluidPercentage) {
                                 type.setFluidPercentage(maxFluidPercentage);
@@ -122,11 +124,12 @@ public class SkyIslandDataV2MillenaireVillage extends SkyIslandDataV2AutoExtend 
                             super.addType(type);
                             return;
                         }
+
                     }
                 }
             }
         } catch (IllegalAccessException e) {
-            e.printStackTrace();
+            throw new RuntimeException(e); //whatever ,script parser won't deal the error serious
         }
     }
 
