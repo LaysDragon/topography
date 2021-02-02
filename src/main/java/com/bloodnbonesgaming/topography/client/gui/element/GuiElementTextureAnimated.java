@@ -49,7 +49,7 @@ public class GuiElementTextureAnimated extends GuiElementTextureStretch
     @Override
     public void render(Minecraft minecraft, int guiWidth, int guiHeight)
     {        
-        if (this.texture.getResourcePath().endsWith(".gif"))
+        if (this.texture.getPath().endsWith(".gif"))
         {
             if (this.gifTexture == null)
             {

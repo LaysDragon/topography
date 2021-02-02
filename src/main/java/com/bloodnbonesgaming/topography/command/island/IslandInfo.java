@@ -185,7 +185,7 @@ public class IslandInfo extends CommandBase
     
     public static BlockPos getTopSolidOrLiquidBlock(World world, BlockPos pos)
     {
-        Chunk chunk = world.getChunkFromBlockCoords(pos);
+        Chunk chunk = world.getChunk(pos);
         BlockPos blockpos;
         BlockPos blockpos1;
 

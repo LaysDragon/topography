@@ -110,7 +110,7 @@ public class EventSubscriber
     @SubscribeEvent
     public void onGetPotentialSpawns(final WorldEvent.PotentialSpawns event)
     {
-    	if (event.getWorld().getChunkFromBlockCoords(event.getPos()).isEmpty())
+    	if (event.getWorld().getChunk(event.getPos()).isEmpty())
         {
             event.setCanceled(true);
         }

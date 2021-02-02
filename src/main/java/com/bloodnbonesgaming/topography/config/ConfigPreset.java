@@ -155,7 +155,7 @@ public class ConfigPreset
     @ScriptMethodDocumentation(args = "int", usage = "difficulty value", notes = "Sets the initial difficulty of the preset.")
 	public void setDifficulty(final int difficulty) throws Exception
     {
-    	final EnumDifficulty e = EnumDifficulty.getDifficultyEnum(difficulty);
+    	final EnumDifficulty e = EnumDifficulty.byId(difficulty);
     	
     	if (e != null)
     	{

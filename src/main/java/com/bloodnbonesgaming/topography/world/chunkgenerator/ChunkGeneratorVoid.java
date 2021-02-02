@@ -157,7 +157,7 @@ public class ChunkGeneratorVoid implements IChunkGenerator
     @Override
     public List<Biome.SpawnListEntry> getPossibleCreatures(EnumCreatureType creatureType, BlockPos pos)
     {
-        if (this.worldObj.getChunkFromBlockCoords(pos).isEmpty())
+        if (this.worldObj.getChunk(pos).isEmpty())
             return null;
         Biome biome = this.worldObj.getBiome(pos);
 

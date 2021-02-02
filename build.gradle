@@ -39,7 +39,7 @@ archivesBaseName = "Topography"
 
 minecraft {
     version = config.minecraft_version + "-" + config.forge_version
-	mappings = "snapshot_20180407"
+	mappings = "stable_39"
 	runDir = "run"
 
     replaceIn "topography/ModInfo.java"

@@ -78,7 +78,7 @@ public class EntityEffect
         {
             for (final ResourceLocation location : this.effectedEntities)
             {
-                if (location.getResourcePath().equalsIgnoreCase("player"))
+                if (location.getPath().equalsIgnoreCase("player"))
                 {
                     if (entity instanceof EntityPlayer)
                     {

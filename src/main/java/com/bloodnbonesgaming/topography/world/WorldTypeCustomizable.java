@@ -104,7 +104,7 @@ public class WorldTypeCustomizable extends WorldType
         
         if (type != null)
         {
-            worldType = WorldType.parseWorldType(type);
+            worldType = WorldType.byName(type);
             
             if (worldType != null)
             {

@@ -1,5 +1,6 @@
 package com.bloodnbonesgaming.topography.world;
 
+import com.bloodnbonesgaming.topography.Topography;
 import com.bloodnbonesgaming.topography.config.*;
 import com.bloodnbonesgaming.topography.world.chunkgenerator.ChunkGeneratorVoid;
 import com.bloodnbonesgaming.topography.world.generator.IGenerator;
@@ -51,6 +52,7 @@ public class MillenaireVillageGen extends WorldGenVillage {
                             long subSeed = random.nextLong();
                             boolean result = this.generateVillageAtPoint(world, random, pos.getX(), pos.getY(), pos.getZ(), null, false, true, true, 2147483647, villageType, null, null, 100);
                             if (!result) {
+                                Topography.instance.getLog().info("failed to spawn village["+villageType.culture+","+villageType.name+"] at island["+pos.getX()+","+pos.getZ()+"]");
                                 this.generateVillageAtPoint(world, random, pos.getX(), pos.getY(), pos.getZ(), null, false, true, true, 2147483647, villageType, null, null, 100);
                             }
                         }
