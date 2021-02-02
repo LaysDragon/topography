@@ -11,6 +11,8 @@ import net.minecraft.world.World;
 import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.gen.IChunkGenerator;
 import net.minecraftforge.fml.common.IWorldGenerator;
+import org.millenaire.common.config.MillConfigParameter;
+import org.millenaire.common.config.MillConfigValues;
 import org.millenaire.common.culture.Culture;
 import org.millenaire.common.culture.VillageType;
 import org.millenaire.common.world.WorldGenVillage;
@@ -33,7 +35,7 @@ public class MillenaireVillageGen extends WorldGenVillage {
         for (final IGenerator generator : definition.getGenerators()) {
             if (generator instanceof SkyIslandGeneratorV2) {
                 SkyIslandGeneratorV2 skyIslandsGenerator = (SkyIslandGeneratorV2) generator;
-                if(!skyIslandsGenerator.isMillenaireIslandEnable()){
+                if (!skyIslandsGenerator.isMillenaireIslandEnable()) {
                     continue;
                 }
 
@@ -49,18 +51,46 @@ public class MillenaireVillageGen extends WorldGenVillage {
                             }
                             SkyIslandDataV2MillenaireVillage data = (SkyIslandDataV2MillenaireVillage) skyIslandData;
                             VillageType villageType = data.getVillageType();
-                            long subSeed = random.nextLong();
-                            boolean result = this.generateVillageAtPoint(world, random, pos.getX(), pos.getY(), pos.getZ(), null, false, true, true, 2147483647, villageType, null, null, 100);
-                            if (!result) {
-                                Topography.instance.getLog().info("failed to spawn village["+villageType.culture+","+villageType.name+"] at island["+pos.getX()+","+pos.getZ()+"]");
-                                this.generateVillageAtPoint(world, random, pos.getX(), pos.getY(), pos.getZ(), null, false, true, true, 2147483647, villageType, null, null, 100);
+                            float completionRatio = 0;
+                            if (MillConfigValues.villageSpawnCompletionMaxPercentage > 0) {
+                                completionRatio = (float) random.nextInt(MillConfigValues.villageSpawnCompletionMaxPercentage) / 100;
+                                completionRatio = random.nextFloat() * completionRatio;
                             }
+                            boolean result = this.generateVillageAtPoint(world, random, pos.getX(), pos.getY(), pos.getZ(), null, false, true, true, 0, villageType, null, null, completionRatio);
+                            if (result) {
+                                return;
+                            }
+
+                            int tryCount = 10;
+                            do {
+                                BlockPos newPos = pos;
+                                Topography.instance.getLog().info("failed to spawn village[" + villageType.culture + "," + villageType.name + "] at island[" + newPos.getX() + "," + newPos.getZ() + "] completionRatio:" + completionRatio);
+                                if (tryCount < 0) {
+                                    completionRatio -= 0.01;
+                                } else {
+                                    tryCount--;
+                                }
+
+                                newPos = generatePos(random, data, pos);
+                                Topography.instance.getLog().info("try to spawn again village[" + villageType.culture + "," + villageType.name + "] at island[" + newPos.getX() + "," + newPos.getZ() + "] completionRatio:" + completionRatio);
+                                result = this.generateVillageAtPoint(world, random, newPos.getX(), newPos.getY(), newPos.getZ(), null, false, true, true, 0, villageType, null, null, completionRatio);
+
+                            } while (!result && completionRatio >= 0);
                         }
 
                     }
                 });
             }
         }
+
+
+    }
+
+    private BlockPos generatePos(Random random, SkyIslandDataV2MillenaireVillage data, BlockPos center) {
+        int maxRadius = (int) Math.round(data.getVillageType().radius * 0.5);
+        int randomOffsetX = random.nextInt(maxRadius * 2) - maxRadius;
+        int randomOffsetZ = random.nextInt(maxRadius * 2) - maxRadius;
+        return center.add(randomOffsetX, 0, randomOffsetZ);
 
 
     }
