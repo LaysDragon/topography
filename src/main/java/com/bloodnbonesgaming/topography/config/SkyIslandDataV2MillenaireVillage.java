@@ -31,7 +31,7 @@ public class SkyIslandDataV2MillenaireVillage extends SkyIslandDataV2AutoExtend 
 
     //I have no choice since millenaire use a field only can access from a client side method as biome id,
     //I have to use the sameway how millenair fetch the biome name instead of biome resource id
-    private static Field REFLECT_BIOME_ACCESSOR = ObfuscationReflectionHelper.findField(Biome.class, "biomeName");
+    private static Field REFLECT_BIOME_ACCESSOR = ObfuscationReflectionHelper.findField(Biome.class, "field_76791_y");//biomeName
 
     public int getMaxBottomHeight() {
         return maxBottomHeight;
@@ -109,27 +109,32 @@ public class SkyIslandDataV2MillenaireVillage extends SkyIslandDataV2AutoExtend 
 //        return villageName;
 //    }
 
-    @Override
-    public void addType(SkyIslandType type) {
+
+    private String getBiomeName(int biomeID) {
         try {
-            for (Culture culture : Culture.ListCultures) {
-                for (VillageType villageType : culture.listVillageTypes) {
-                    if (villageType.weight > 0) {
-
-                        if (villageType.biomes.contains(((String) REFLECT_BIOME_ACCESSOR.get(Biome.getBiome(type.getBiome()))).toLowerCase())) {
-                            type = new SkyIslandType(type);
-                            if (type.getFluidPercentage() > maxFluidPercentage) {
-                                type.setFluidPercentage(maxFluidPercentage);
-                            }
-                            super.addType(type);
-                            return;
-                        }
-
-                    }
-                }
-            }
+            return ((String) REFLECT_BIOME_ACCESSOR.get(Biome.getBiome(biomeID))).toLowerCase();
         } catch (IllegalAccessException e) {
             throw new RuntimeException(e); //whatever ,script parser won't deal the error serious
+        }
+    }
+
+    @Override
+    public void addType(SkyIslandType type) {
+        for (Culture culture : Culture.ListCultures) {
+            for (VillageType villageType : culture.listVillageTypes) {
+                if (villageType.weight > 0) {
+
+                    if (villageType.biomes.contains(getBiomeName(type.getBiome()))) {
+                        type = new SkyIslandType(type);
+                        if (type.getFluidPercentage() > maxFluidPercentage) {
+                            type.setFluidPercentage(maxFluidPercentage);
+                        }
+                        super.addType(type);
+                        return;
+                    }
+
+                }
+            }
         }
     }
 
@@ -140,7 +145,7 @@ public class SkyIslandDataV2MillenaireVillage extends SkyIslandDataV2AutoExtend 
         List<VillageType> validVillageTypes = new ArrayList<>();
         for (Culture culture : Culture.ListCultures) {
             for (VillageType villageType : culture.listVillageTypes) {
-                if (villageType.biomes.contains(Biome.getBiome(islandType.getBiome()).getBiomeName().toLowerCase())) {
+                if (villageType.biomes.contains(getBiomeName(islandType.getBiome()))) {
                     validVillageTypes.add(villageType);
                 }
             }
