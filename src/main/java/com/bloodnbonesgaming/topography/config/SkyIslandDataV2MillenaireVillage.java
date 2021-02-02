@@ -3,11 +3,15 @@ package com.bloodnbonesgaming.topography.config;
 import com.bloodnbonesgaming.lib.util.script.ScriptClassDocumentation;
 import com.bloodnbonesgaming.lib.util.script.ScriptMethodDocumentation;
 import com.bloodnbonesgaming.topography.ModInfo;
+import com.bloodnbonesgaming.topography.Topography;
 import net.minecraft.advancements.critereon.MinMaxBounds;
 import net.minecraft.world.biome.Biome;
+import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
+import net.minecraftforge.fml.relauncher.ReflectionHelper;
 import org.millenaire.common.culture.Culture;
 import org.millenaire.common.culture.VillageType;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -24,6 +28,9 @@ public class SkyIslandDataV2MillenaireVillage extends SkyIslandDataV2AutoExtend 
     MinMaxBounds resizeRatioBound = new MinMaxBounds(1F, 1.4F);
     VillageType villageType = null;
 
+    //I have no choice since millenaire use a field only can access from a client side method as biome id,
+    //I have to use the sameway how millenair fetch the biome name instead of biome resource id
+    private static Field REFLECT_BIOME_ACCESSOR = ObfuscationReflectionHelper.findField(Biome.class, "biomeName");
 
     public int getMaxBottomHeight() {
         return maxBottomHeight;
@@ -103,19 +110,23 @@ public class SkyIslandDataV2MillenaireVillage extends SkyIslandDataV2AutoExtend 
 
     @Override
     public void addType(SkyIslandType type) {
-        for (Culture culture : Culture.ListCultures) {
-            for (VillageType villageType : culture.listVillageTypes) {
-                if (villageType.weight > 0) {
-                    if (villageType.biomes.contains(Biome.getBiome(type.getBiome()).getBiomeName().toLowerCase())) {
-                        type = new SkyIslandType(type);
-                        if (type.getFluidPercentage() > maxFluidPercentage) {
-                            type.setFluidPercentage(maxFluidPercentage);
+        try {
+            for (Culture culture : Culture.ListCultures) {
+                for (VillageType villageType : culture.listVillageTypes) {
+                    if (villageType.weight > 0) {
+                        if (villageType.biomes.contains(((String)REFLECT_BIOME_ACCESSOR.get(Biome.getBiome(type.getBiome()))).toLowerCase())) {
+                            type = new SkyIslandType(type);
+                            if (type.getFluidPercentage() > maxFluidPercentage) {
+                                type.setFluidPercentage(maxFluidPercentage);
+                            }
+                            super.addType(type);
+                            return;
                         }
-                        super.addType(type);
-                        return;
                     }
                 }
             }
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
         }
     }
 
