@@ -3,12 +3,9 @@ package com.bloodnbonesgaming.topography.config;
 import com.bloodnbonesgaming.lib.util.script.ScriptClassDocumentation;
 import com.bloodnbonesgaming.lib.util.script.ScriptMethodDocumentation;
 import com.bloodnbonesgaming.topography.ModInfo;
-import com.bloodnbonesgaming.topography.Topography;
-import io.netty.channel.unix.Errors;
 import net.minecraft.advancements.critereon.MinMaxBounds;
 import net.minecraft.world.biome.Biome;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
-import net.minecraftforge.fml.relauncher.ReflectionHelper;
 import org.millenaire.common.culture.Culture;
 import org.millenaire.common.culture.VillageType;
 
@@ -31,7 +28,7 @@ public class SkyIslandDataV2MillenaireVillage extends SkyIslandDataV2AutoExtend 
 
     //I have no choice since millenaire use a field only can access from a client side method as biome id,
     //I have to use the sameway how millenair fetch the biome name instead of biome resource id
-    private static Field REFLECT_BIOME_ACCESSOR = ObfuscationReflectionHelper.findField(Biome.class, "field_76791_y");//biomeName
+    final private static Field REFLECT_BIOME_NAME_ACCESSOR = ObfuscationReflectionHelper.findField(Biome.class, "field_76791_y");//biomeName
 
     public int getMaxBottomHeight() {
         return maxBottomHeight;
@@ -110,9 +107,9 @@ public class SkyIslandDataV2MillenaireVillage extends SkyIslandDataV2AutoExtend 
 //    }
 
 
-    private String getBiomeName(int biomeID) {
+    public static String getBiomeName(int biomeID) {
         try {
-            return ((String) REFLECT_BIOME_ACCESSOR.get(Biome.getBiome(biomeID))).toLowerCase();
+            return ((String) REFLECT_BIOME_NAME_ACCESSOR.get(Biome.getBiome(biomeID))).toLowerCase();
         } catch (IllegalAccessException e) {
             throw new RuntimeException(e); //whatever ,script parser won't deal the error serious
         }
