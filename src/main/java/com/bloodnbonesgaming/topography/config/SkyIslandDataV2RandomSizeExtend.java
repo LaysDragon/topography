@@ -57,7 +57,7 @@ public class SkyIslandDataV2RandomSizeExtend extends SkyIslandDataV2AutoExtend {
     }
 
     int calculateChance(int sizeA, int chanceA, int sizeC, int chanceC, int sizeB) {
-        return ((chanceC - chanceA) / (sizeC - sizeA)) * (sizeB - sizeA) + chanceA;
+        return (int)Math.round(((chanceC - chanceA) / (double)(sizeC - sizeA)) * (sizeB - sizeA) + chanceA);
     }
 
     int calculateChance(Map.Entry<Integer, Integer> entryA, Map.Entry<Integer, Integer> entryC, int sizeB) {
