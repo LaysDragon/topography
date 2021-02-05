@@ -66,6 +66,28 @@ public class SkyIslandGeneratorV2 extends SkyIslandGenerator implements IStructu
     }
 
     private boolean MillenaireIslandEnable = false;
+
+    public double getLoneBuildingChance() {
+        return loneBuildingChance;
+    }
+
+    @ScriptMethodDocumentation(args = "double", usage = "chance", notes = "Sets the millenaire lone building chance to try to spawn on a island")
+    public void setLoneBuildingChance(double loneBuildingChance) {
+        this.loneBuildingChance = loneBuildingChance;
+    }
+
+    public double getKeyLoneBuildingChance() {
+        return keyLoneBuildingChance;
+    }
+
+    @ScriptMethodDocumentation(args = "double", usage = "chance", notes = "Sets the millenaire lone building is a key building while try to generate a lone building")
+    public void setKeyLoneBuildingChance(double keyLoneBuildingChance) {
+        this.keyLoneBuildingChance = keyLoneBuildingChance;
+    }
+
+    private double loneBuildingChance = 1.0;
+    private double keyLoneBuildingChance = 0.3;
+
     double[] islandNoiseArray = new double[65536];
     double[] islandWaterNoiseArray = new double[65536];
 
@@ -633,7 +655,7 @@ public class SkyIslandGeneratorV2 extends SkyIslandGenerator implements IStructu
 //                long subSeed = rand.nextLong();
                 SkyIslandDataV2 data = islandData;
                 if (data instanceof SkyIslandDataV2AutoExtend) {
-                    data = ((SkyIslandDataV2AutoExtend)data).generate(extendRandom);
+                    data = ((SkyIslandDataV2AutoExtend) data).generate(extendRandom);
                 }
 
                 final double maxHorizontalFeatureRadius = data.getHorizontalRadius();
@@ -761,7 +783,7 @@ public class SkyIslandGeneratorV2 extends SkyIslandGenerator implements IStructu
 
     @ScriptMethodDocumentation(args = "int,int,int,double,int, int,boolean", usage = "fallback radius,maxBottomHeight,topHeight,maxFluidPercentage, count, minCount,randomType", notes = "Generates a Millenaire SkyIslandDataV2 and returns it. "
             + "Radius is the default radius of the sky islands to be generated, count is the number of times to attempt to generate sky islands, minCount is the minimum number of the sky islands which must be generated. ")
-    public SkyIslandDataV2MillenaireVillage addMillenaireSkyIslands(final int radius ,final int maxBottomHeight,final int topHeight,final double maxFluidPercentage,final int count ,final int minCount,final boolean randomType) {
+    public SkyIslandDataV2MillenaireVillage addMillenaireSkyIslands(final int radius, final int maxBottomHeight, final int topHeight, final double maxFluidPercentage, final int count, final int minCount, final boolean randomType) {
         this.MillenaireIslandEnable = true;
         final SkyIslandDataV2MillenaireVillage data = new SkyIslandDataV2MillenaireVillage();
         data.setHorizontalRadius(radius);
@@ -783,7 +805,7 @@ public class SkyIslandGeneratorV2 extends SkyIslandGenerator implements IStructu
             + "Radius is the radius of the sky islands to be generated, count is the number of times to attempt to generate sky islands, randomTypes is how to use the SkyIslandTypes. "
             + "If randomTypes is set to true it will randomly choose a SkyIslandType from the list when an island is generated. "
             + "If it is set to false, then every time an island is generated it will use the next SkyIslandType in the list. This allows you to guarantee certain islands are generated in a region.")
-    public SkyIslandDataV2RandomSizeExtend addRandomSizeSkyIslands(final int count,final int maxVerticalRadius,final boolean interpolation, final boolean randomTypes) {
+    public SkyIslandDataV2RandomSizeExtend addRandomSizeSkyIslands(final int count, final int maxVerticalRadius, final boolean interpolation, final boolean randomTypes) {
         final SkyIslandDataV2RandomSizeExtend data = new SkyIslandDataV2RandomSizeExtend();
 //        data.setHorizontalRadius(50);
 //        data.setVerticalRadius(50);
@@ -1052,7 +1074,7 @@ public class SkyIslandGeneratorV2 extends SkyIslandGenerator implements IStructu
 //        river = GenLayerZoom.magnify(1000L, river, 3); //Lower to reduce size
 //        river = new GenLayerSmooth(1000L, river);
 //        river = GenLayerZoom.magnify(1000L, river, 1);
-        GenLayer biomes = new GenLayerBiomeSkyIslands(world.getSeed(), this,parent);
+        GenLayer biomes = new GenLayerBiomeSkyIslands(world.getSeed(), this, parent);
 //        GenLayerRiverMixDC mix = new GenLayerRiverMixDC(1000L, biomes, river);
 //        mix.setRiverBiome(Biome.getIdForBiome(Biomes.VOID), Biome.getIdForBiome(Biomes.VOID));
         return biomes;

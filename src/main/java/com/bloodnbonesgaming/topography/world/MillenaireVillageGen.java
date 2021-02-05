@@ -40,52 +40,134 @@ public class MillenaireVillageGen extends WorldGenVillage {
             return;
         }
 
-        generateVillageTask(random, chunkX, chunkZ, world);
 
-        generateLoneTask(random, chunkX, chunkZ, world);
+        ConfigPreset preset = ConfigurationManager.getInstance().getPreset();
+        if (preset == null) {
+            return;
+        }
+        DimensionDefinition definition = preset.getDefinition(world.provider.getDimension());
+        for (final IGenerator generator : definition.getGenerators()) {
+            if (generator instanceof SkyIslandGeneratorV2) {
+                SkyIslandGeneratorV2 skyIslandsGenerator = (SkyIslandGeneratorV2) generator;
+
+                Map<SkyIslandData, Map<BlockPos, SkyIslandType>> islandPositions = skyIslandsGenerator.getIslandPositions(world.getSeed(), chunkX * 16, chunkZ * 16);
+
+                if (skyIslandsGenerator.isMillenaireIslandEnable()) {
+                    generateVillageTask(random, chunkX, chunkZ, world, islandPositions);
+                }
+
+                generateLoneTask(random, chunkX, chunkZ, world, islandPositions,skyIslandsGenerator.getLoneBuildingChance(),skyIslandsGenerator.getKeyLoneBuildingChance());
+            }
+        }
 //
 
 //
 
     }
 
-    private void generateLoneTask(Random random, int chunkX, int chunkZ, World world) {
-        //lone building generating logic
-        BlockPos pos;
-        int tryCount = 5;
-        do {
-            pos = new BlockPos(chunkX * 16 + random.nextInt(16), 255, chunkZ * 16 + random.nextInt(16));
-            pos = world.getTopSolidOrLiquidBlock(pos);
-            tryCount--;
-        } while (pos.getY() <= 0 && tryCount > 0);
-        String biomeName = SkyIslandDataV2MillenaireVillage.getBiomeName(Biome.getIdForBiome(world.getBiome(pos)));
-        EntityPlayer worldClosestPlayer = world.getClosestPlayer(pos.getX(), pos.getY(), pos.getZ(), 200, false);
-        MillWorldData millWorld = Mill.getMillWorld(world);
-        HashMap<String, Integer> loneTypesCountingMap = (HashMap<String, Integer>) millWorld.loneBuildingsList.types.stream().collect(Collectors.groupingBy(Function.identity(), Collectors.summingInt(x -> 1)));
-        BlockPos finalPos = pos;
+    private void generateLoneTask(Random random, int chunkX, int chunkZ, World world, Map<SkyIslandData, Map<BlockPos, SkyIslandType>> islandPositions,double generateRatio,double keyRatio) {
+        islandPositions.forEach((skyIslandData, blockPosSkyIslandTypeMap) -> {
+            if (!(skyIslandData instanceof SkyIslandDataV2MillenaireVillage)) {
+                for (Map.Entry<BlockPos, SkyIslandType> entry : blockPosSkyIslandTypeMap.entrySet()) {
+
+                    BlockPos islandpos = entry.getKey();
+                    int islandChunkX = islandpos.getX() >> 4;
+                    int islandChunkZ = islandpos.getZ() >> 4;
+                    if (islandChunkX != chunkX || islandChunkZ != chunkZ) {
+                        return;
+                    }
+                    if( random.nextInt() > generateRatio){
+                        return;
+                    }
+
+                    MillWorldData millWorld = Mill.getMillWorld(world);
+                    int minVillagesDistance = Math.min(2147483647, MillConfigValues.minDistanceBetweenVillagesAndLoneBuildings);
+                    int minLoneBuildingsDistance = Math.min(2147483647, MillConfigValues.minDistanceBetweenLoneBuildings);
+                    boolean tryKeyLoneBuilding = false;
+
+                    Point islandPoint = new Point(islandpos);
+                    // it wouldn't work will cause island's usable area is too distribute
+//                    tryKeyLoneBuilding = millWorld.villagesList.pos.stream().anyMatch(point -> islandPoint.distanceTo(point) < minVillagesDistance && islandPoint.distanceTo(point) > (minVillagesDistance / 2.0));
+//
+//
+//                    if(!tryKeyLoneBuilding){
+//                        tryKeyLoneBuilding = millWorld.villagesList.pos.stream().anyMatch(point -> islandPoint.distanceTo(point) < minLoneBuildingsDistance && islandPoint.distanceTo(point) < (minLoneBuildingsDistance / 4.0));
+//                    }
+                    tryKeyLoneBuilding = random.nextInt() < keyRatio;
+                    EntityPlayer worldClosestPlayer = world.getClosestPlayer(islandpos.getX(), islandpos.getY(), islandpos.getZ(), 200, false);
+                    HashMap<String, Integer> loneTypesCountingMap = (HashMap<String, Integer>) millWorld.loneBuildingsList.types.stream().collect(Collectors.groupingBy(Function.identity(), Collectors.summingInt(x -> 1)));
+
+                    boolean result;
+                    int spawnTry = 20;
+                    do {
+
+
+
+
+                        BlockPos pos;// = choiceRandomPosOnIsland(random, islandpos, (int) Math.round(skyIslandData.getRadius() * 0.7));
+//                      lone building generating logic
+                        int tryCount = 5;
+                        do {
+                            pos = choiceRandomPosOnIsland(random, islandpos, (int) Math.round(skyIslandData.getRadius() * 0.7));
+                            pos = world.getTopSolidOrLiquidBlock(pos);
+                            tryCount--;
+                        } while (pos.getY() <= 0 && tryCount > 0);
+                        if (pos.getY() <= 0) {
+                            return;
+                        }
+
+
+//                        BlockPos finalPos = pos;
+                        String biomeName = SkyIslandDataV2MillenaireVillage.getBiomeName(Biome.getIdForBiome(world.getBiome(pos)));
+
+
+
+                        float completionRatio = calculatingCompletionRatio(random);
+//        this.generateVillageAtPoint(world, random, finalPos.getX(), finalPos.getY(), finalPos.getZ(), null, false, true, true, 0, choiceLoneType, null, null, completionRatio);
+                        try {
+                            Point targetPos = new Point(pos);
+
+
+                            VillageType choiceLoneType = getRandomChoiceLoneType(biomeName, worldClosestPlayer, millWorld, loneTypesCountingMap, targetPos, true,tryKeyLoneBuilding);
+
+                            if (choiceLoneType == null) {
+                                return;
+                            }
+
+                            result = this.generateVillagePrivate(targetPos, world, choiceLoneType, null, worldClosestPlayer, random, 2147483647, null, null, completionRatio, false, true);
+                            spawnTry--;
+                            if (!result) {
+                                Topography.instance.getLog().info("failed to spawn lone building[" + choiceLoneType.culture + "," + choiceLoneType.name + "] at island[" + pos.getX() + "," + pos.getZ() + "] completionRatio:" + completionRatio);
+                            }
+                            if (result && worldClosestPlayer != null && choiceLoneType.isKeyLoneBuildingForGeneration(worldClosestPlayer) && choiceLoneType.keyLoneBuildingGenerateTag != null) {
+                                UserProfile profile = millWorld.getProfile(worldClosestPlayer);
+                                profile.clearTag(choiceLoneType.keyLoneBuildingGenerateTag);
+                            }
+                        } catch (MillLog.MillenaireException e) {
+                            Topography.instance.getLog().error("Exception while trying to generating lone building");
+                            e.printStackTrace();
+                            return;
+                        }
+                    } while (!result && spawnTry > 0);
+                }
+
+            }
+        });
+
+    }
+
+    private VillageType getRandomChoiceLoneType(String biomeName, EntityPlayer worldClosestPlayer, MillWorldData millWorld, HashMap<String, Integer> loneTypesCountingMap, Point targetPoint, boolean ignoreBiome,boolean tryKeyLoneBuilding) {
         List<VillageType> effectiveLoneTypes = Culture.ListCultures.stream()
                 .flatMap(culture -> culture.listLoneBuildingTypes.stream())
-                .filter(villageType -> villageType.isValidForGeneration(millWorld, worldClosestPlayer, loneTypesCountingMap, new Point(finalPos), biomeName, true))
+//                .filter(villageType -> villageType.biomes.size() >0)
+                //if ignoreBiome then feed it with one of it's biome list value to bypass the biome check
+                .filter(villageType -> villageType.isValidForGeneration(millWorld, worldClosestPlayer, loneTypesCountingMap, targetPoint, ignoreBiome && villageType.biomes.size() > 0 ? villageType.biomes.get(0) : biomeName, tryKeyLoneBuilding))
                 .collect(Collectors.toList());
         if (effectiveLoneTypes.isEmpty()) {
-            return;
+            return null;
         }
         VillageType choiceLoneType = (VillageType) MillCommonUtilities.getWeightedChoice(effectiveLoneTypes, worldClosestPlayer);
-        if (choiceLoneType == null) {
-            return;
-        }
-        float completionRatio = calculatingCompletionRatio(random);
-//        this.generateVillageAtPoint(world, random, finalPos.getX(), finalPos.getY(), finalPos.getZ(), null, false, true, true, 0, choiceLoneType, null, null, completionRatio);
-        try {
-            boolean result = this.generateVillagePrivate(new Point(finalPos), world, choiceLoneType, null, worldClosestPlayer, random, 2147483647, null, null, completionRatio, true, false);
-            if (result && worldClosestPlayer != null && choiceLoneType.isKeyLoneBuildingForGeneration(worldClosestPlayer) && choiceLoneType.keyLoneBuildingGenerateTag != null) {
-                UserProfile profile = millWorld.getProfile(worldClosestPlayer);
-                profile.clearTag(choiceLoneType.keyLoneBuildingGenerateTag);
-            }
-        } catch (MillLog.MillenaireException e) {
-            Topography.instance.getLog().error("Exception while trying to generating village");
-            e.printStackTrace();
-        }
+        return choiceLoneType;
     }
 
     private boolean generateVillagePrivate(Point targetPos, World world, VillageType type, EntityPlayer generatingPlayer, EntityPlayer closestPlayer, Random random, int minDistance, String name, Point parentVillage, float completion, boolean testBiome, boolean alwaysSpawn) throws MillLog.MillenaireException {
@@ -96,58 +178,59 @@ public class MillenaireVillageGen extends WorldGenVillage {
         }
     }
 
-    private void generateVillageTask(Random random, int chunkX, int chunkZ, World world) {
-        ConfigPreset preset = ConfigurationManager.getInstance().getPreset();
-        if (preset == null) {
-            return;
-        }
-        DimensionDefinition definition = preset.getDefinition(world.provider.getDimension());
-        for (final IGenerator generator : definition.getGenerators()) {
-            if (generator instanceof SkyIslandGeneratorV2) {
-                SkyIslandGeneratorV2 skyIslandsGenerator = (SkyIslandGeneratorV2) generator;
-                if (!skyIslandsGenerator.isMillenaireIslandEnable()) {
-                    continue;
-                }
+    private void generateVillageTask(Random random, int chunkX, int chunkZ, World world, Map<SkyIslandData, Map<BlockPos, SkyIslandType>> islandPositions) {
+        islandPositions.forEach((skyIslandData, blockPosSkyIslandTypeMap) -> {
+            if (skyIslandData instanceof SkyIslandDataV2MillenaireVillage) {
+                for (Map.Entry<BlockPos, SkyIslandType> entry : blockPosSkyIslandTypeMap.entrySet()) {
+                    BlockPos pos = entry.getKey();
+                    int islandChunkX = pos.getX() >> 4;
+                    int islandChunkZ = pos.getZ() >> 4;
+                    if (islandChunkX != chunkX || islandChunkZ != chunkZ) {
+                        return;
+                    }
+                    SkyIslandDataV2MillenaireVillage data = (SkyIslandDataV2MillenaireVillage) skyIslandData;
+                    VillageType villageType = data.getVillageType();
+                    float completionRatio = calculatingCompletionRatio(random);
+                    boolean result = this.generateVillageAtPoint(world, random, pos.getX(), pos.getY(), pos.getZ(), null, false, true, true, 0, villageType, null, null, completionRatio);
+                    if (result) {
+                        return;
+                    }
 
-                Map<SkyIslandData, Map<BlockPos, SkyIslandType>> islandPositions = skyIslandsGenerator.getIslandPositions(world.getSeed(), chunkX * 16, chunkZ * 16);
-                islandPositions.forEach((skyIslandData, blockPosSkyIslandTypeMap) -> {
-                    if (skyIslandData instanceof SkyIslandDataV2MillenaireVillage) {
-                        for (Map.Entry<BlockPos, SkyIslandType> entry : blockPosSkyIslandTypeMap.entrySet()) {
-                            BlockPos pos = entry.getKey();
-                            int islandChunkX = pos.getX() >> 4;
-                            int islandChunkZ = pos.getZ() >> 4;
-                            if (islandChunkX != chunkX || islandChunkZ != chunkZ) {
-                                return;
-                            }
-                            SkyIslandDataV2MillenaireVillage data = (SkyIslandDataV2MillenaireVillage) skyIslandData;
-                            VillageType villageType = data.getVillageType();
-                            float completionRatio = calculatingCompletionRatio(random);
-                            boolean result = this.generateVillageAtPoint(world, random, pos.getX(), pos.getY(), pos.getZ(), null, false, true, true, 0, villageType, null, null, completionRatio);
-                            if (result) {
-                                return;
-                            }
-
-                            int tryCount = 10;
-                            do {
-                                BlockPos newPos = pos;
-                                Topography.instance.getLog().info("failed to spawn village[" + villageType.culture + "," + villageType.name + "] at island[" + newPos.getX() + "," + newPos.getZ() + "] completionRatio:" + completionRatio);
-                                if (tryCount < 0) {
-                                    completionRatio -= 0.01;
-                                } else {
-                                    tryCount--;
-                                }
-
-                                newPos = choiceRandomPosOnIsland(random, data, pos);
-                                Topography.instance.getLog().info("try to spawn again village[" + villageType.culture + "," + villageType.name + "] at island[" + newPos.getX() + "," + newPos.getZ() + "] completionRatio:" + completionRatio);
-                                result = this.generateVillageAtPoint(world, random, newPos.getX(), newPos.getY(), newPos.getZ(), null, false, true, true, 0, villageType, null, null, completionRatio);
-
-                            } while (!result && completionRatio >= 0);
+                    int tryCount = 10;
+                    do {
+                        BlockPos newPos = pos;
+                        Topography.instance.getLog().info("failed to spawn village[" + villageType.culture + "," + villageType.name + "] at island[" + newPos.getX() + "," + newPos.getZ() + "] completionRatio:" + completionRatio);
+                        if (tryCount < 0) {
+                            completionRatio -= 0.01;
+                        } else {
+                            tryCount--;
                         }
 
-                    }
-                });
+                        newPos = choiceRandomPosOnIsland(random, pos, (int) Math.round(data.getVillageType().radius * 0.5));
+                        Topography.instance.getLog().info("try to spawn again village[" + villageType.culture + "," + villageType.name + "] at island[" + newPos.getX() + "," + newPos.getZ() + "] completionRatio:" + completionRatio);
+                        result = this.generateVillageAtPoint(world, random, newPos.getX(), newPos.getY(), newPos.getZ(), null, false, true, true, 0, villageType, null, null, completionRatio);
+
+                    } while (!result && completionRatio >= 0);
+//                    if(!result){
+//                        completionRatio = calculatingCompletionRatio(random);
+//                        String biomeName = SkyIslandDataV2MillenaireVillage.getBiomeName(Biome.getIdForBiome(world.getBiome(pos)));
+//                        EntityPlayer worldClosestPlayer = world.getClosestPlayer(pos.getX(), pos.getY(), pos.getZ(), 200, false);
+//                        MillWorldData millWorld = Mill.getMillWorld(world);
+//                        HashMap<String, Integer> loneTypesCountingMap = (HashMap<String, Integer>) millWorld.loneBuildingsList.types.stream().collect(Collectors.groupingBy(Function.identity(), Collectors.summingInt(x -> 1)));
+//                        VillageType choiceLoneType = getRandomChoiceLoneType(biomeName, worldClosestPlayer, millWorld, loneTypesCountingMap, finalPos);
+//
+//                        if (choiceLoneType == null) {
+//                            return;
+//                        }
+//                        if (result && worldClosestPlayer != null && choiceLoneType.isKeyLoneBuildingForGeneration(worldClosestPlayer) && choiceLoneType.keyLoneBuildingGenerateTag != null) {
+//                            UserProfile profile = millWorld.getProfile(worldClosestPlayer);
+//                            profile.clearTag(choiceLoneType.keyLoneBuildingGenerateTag);
+//                        }
+//                    }
+                }
+
             }
-        }
+        });
     }
 
     private float calculatingCompletionRatio(Random random) {
@@ -159,8 +242,8 @@ public class MillenaireVillageGen extends WorldGenVillage {
         return completionRatio;
     }
 
-    private BlockPos choiceRandomPosOnIsland(Random random, SkyIslandDataV2MillenaireVillage data, BlockPos center) {
-        int maxRadius = (int) Math.round(data.getVillageType().radius * 0.5);
+    private BlockPos choiceRandomPosOnIsland(Random random, BlockPos center, int maxRadius) {
+//        int maxRadius = (int) Math.round(data.getVillageType().radius * range);
         int randomOffsetX = random.nextInt(maxRadius * 2) - maxRadius;
         int randomOffsetZ = random.nextInt(maxRadius * 2) - maxRadius;
         return center.add(randomOffsetX, 0, randomOffsetZ);
