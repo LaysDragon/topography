@@ -149,6 +149,6 @@ public class WorldTypeCustomizable extends WorldType
         {
             worldType.onGUICreateWorldPress();
         }
-        gui = null;
+//        gui = null;
     }
 }

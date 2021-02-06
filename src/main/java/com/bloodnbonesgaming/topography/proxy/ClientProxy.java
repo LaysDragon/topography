@@ -39,7 +39,9 @@ public class ClientProxy extends CommonProxy
             if (ConfigurationManager.getInstance() != null)
             {
             	WorldInfo worldinfo = IOHelper.readWorldInfo(server.getFolderName());
-                
+            	if(worldinfo == null){
+            	    worldinfo = new WorldInfo(server.worldSettings,server.getWorldName());
+                }
                 if (worldinfo != null)
                 {
                     String settings = worldinfo.getGeneratorOptions();
