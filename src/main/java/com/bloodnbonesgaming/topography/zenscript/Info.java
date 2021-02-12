@@ -17,6 +17,6 @@ public class Info {
     	{
     		return ConfigurationManager.getInstance().getGeneratorSettings();
     	}
-    	return "";IslandSet
+    	return "";
     }
 }
